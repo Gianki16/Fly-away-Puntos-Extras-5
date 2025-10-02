@@ -1,0 +1,10 @@
+Hello John Doe,
+
+Your booking was successful!
+
+The booking is for flight AA448 with departure date of 2025-10-05T07:00:00Z and arrival date of 2025-10-05T14:00:00Z.
+
+The booking was registered at 2025-10-02T14:36:53Z.
+
+Bon Voyage!
+Fly Away Travel

@@ -30,6 +30,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!-- Agregar Spring Security para JWT -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -87,11 +92,6 @@
             <artifactId>picocli</artifactId>
             <version>4.7.5</version>
         </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.18</version>
-        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -112,7 +112,6 @@
             <version>4.5.0</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.modelmapper</groupId>
             <artifactId>modelmapper</artifactId>
@@ -128,6 +127,12 @@
             <artifactId>spring-boot-starter-validation</artifactId>
             <version>3.2.5</version>
         </dependency>
+        <dependency>
+            <groupId>me.paulschwarz</groupId>
+            <artifactId>spring-dotenv</artifactId>
+            <version>4.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -137,6 +142,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.5.4</version>
             </plugin>
+
+            <!-- Deshabilitar el JAR por defecto -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -148,12 +155,15 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Plugin para crear el JAR del tester CLI -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.7.1</version>
                 <executions>
                     <execution>
+                        <id>tester-jar</id>
                         <phase>package</phase>
                         <goals>
                             <goal>single</goal>
@@ -174,26 +184,64 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- Plugin de Spring Boot para crear el JAR de la API -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>utec.api.ApiApplication</mainClass>
+                    <classifier>api</classifier>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>repackage-api</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Plugin Exec para ejecutar las aplicaciones -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
+                    <!-- Configuración para ejecutar el tester CLI -->
                     <execution>
+                        <id>run-tester</id>
                         <goals>
                             <goal>java</goal>
                         </goals>
+                        <configuration>
+                            <mainClass>utec.Application</mainClass>
+                            <arguments>
+                                <argument>test</argument>
+                                <argument>-u</argument>
+                                <argument>http://localhost:8080</argument>
+                                <argument>-n</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <!-- Configuración para ejecutar la API Spring Boot -->
+                    <execution>
+                        <id>run-api</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>utec.api.ApiApplication</mainClass>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <mainClass>utec.Application</mainClass>
-                    <arguments>
-                        <argument>test</argument>
-                        <argument>-u</argument>
-                        <argument>http://localhost:8080</argument>
-                        <argument>-n</argument>
-                    </arguments>
-                </configuration>
             </plugin>
         </plugins>
     </build>
